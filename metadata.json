@@ -1,0 +1,7 @@
+{
+  "name": "SilkFlow - Order Management System",
+  "description": "A comprehensive order management system for a Silk Production House, allowing users to create, view, and manage orders with role-based access control, image capture, and export functionalities.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
