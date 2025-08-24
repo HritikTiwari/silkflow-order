@@ -18,6 +18,7 @@ const App: React.FC = () => {
     users, saveUser, toggleBlockUser, deleteUser 
   } = useAuth();
   const [currentPage, setCurrentPage] = useState('interactive-dashboard'); // 'interactive-dashboard', 'dashboard', 'clients', 'users', 'masters'
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Lifted state for all major data entities EXCEPT users
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
@@ -194,6 +195,11 @@ const App: React.FC = () => {
     setCurrentPage('dashboard');
   };
 
+  const handleMobileNavClick = (page: string) => {
+    setCurrentPage(page);
+    setIsMobileMenuOpen(false);
+  }
+
   const PageToRender = () => {
       const allMasterData = { products, statuses, remarks };
       const orderManagementPage = <DashboardPage orders={orders} clients={clients} users={users} masters={allMasterData} onSaveOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} onSaveClient={handleSaveClient} onSaveDispatch={handleSaveDispatch} preselectedFilters={preselectedFilters} onClearPreselection={() => setPreselectedFilters(null)} />;
@@ -254,18 +260,83 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center">
-              <span className="text-sm text-slate-600 mr-4">
-                Welcome, <span className="font-medium">{user.name}</span> ({user.role})
-              </span>
-              <button
-                onClick={logout}
-                className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
-              >
-                Logout
-              </button>
+              <div className="hidden sm:flex items-center">
+                <span className="text-sm text-slate-600 mr-4">
+                  Welcome, <span className="font-medium">{user.name}</span> ({user.role})
+                </span>
+                <button
+                  onClick={logout}
+                  className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-slate-200 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+               {/* Hamburger Button */}
+               <div className="sm:hidden flex items-center">
+                  <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    type="button"
+                    className="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                    aria-controls="mobile-menu"
+                    aria-expanded={isMobileMenuOpen}
+                  >
+                    <span className="sr-only">Open main menu</span>
+                    {!isMobileMenuOpen ? (
+                      <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                    ) : (
+                      <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
             </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="sm:hidden" id="mobile-menu">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              <button onClick={() => handleMobileNavClick('interactive-dashboard')} className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${currentPage === 'interactive-dashboard' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}>
+                Dashboard
+              </button>
+              <button onClick={() => handleMobileNavClick('dashboard')} className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${currentPage === 'dashboard' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}>
+                Order Management
+              </button>
+              {(isAdmin || isUser) && (
+                <button onClick={() => handleMobileNavClick('clients')} className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${currentPage === 'clients' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}>
+                  Clients
+                </button>
+              )}
+              {isAdmin && (
+                <>
+                  <button onClick={() => handleMobileNavClick('masters')} className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${currentPage === 'masters' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}>
+                    Masters
+                  </button>
+                  <button onClick={() => handleMobileNavClick('users')} className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${currentPage === 'users' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}>
+                    User Management
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="pt-4 pb-3 border-t border-slate-200">
+                <div className="flex items-center px-4">
+                    <div>
+                        <div className="text-base font-medium text-slate-800">{user.name}</div>
+                        <div className="text-sm font-medium text-slate-500">{user.email} ({user.role})</div>
+                    </div>
+                </div>
+                <div className="mt-3 space-y-1">
+                    <button onClick={() => { logout(); setIsMobileMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-base font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+                        Logout
+                    </button>
+                </div>
+            </div>
+          </div>
+        )}
       </nav>
       <main className="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <PageToRender />
